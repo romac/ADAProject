@@ -66,7 +66,7 @@ It might then be interesting to compute and assign to each user various ratings,
 
 ### 3. Data Visualization
 
-It's hard to foresee exactly all the ways we could visualize the data and the insights gathered in the previous phases, but some obvious ones come to mind already, such as:
+It is hard to foresee exactly all the ways we could visualize the data and the insights gathered in the previous phases, but some obvious ones come to mind already, such as:
 
 - Map of all the developers
 - Heat map of LOC/commits/stars/etc.
@@ -74,4 +74,32 @@ It's hard to foresee exactly all the ways we could visualize the data and the in
 - Projects dependencies graph
 - List of most popular languages, projects, etc.
 - List of most prolific developers
+- …
+
+## Technologies and tools
+
+We have not settled on a tech stack yet, but the following tools might prove useful:
+
+### Data retrieval
+
+- Python, Scala, or Haskell
+
+### Data storage
+
+- [MongoDB](https://www.mongodb.com/) + [Quasar](http://quasar-analytics.org/)
+- [PostgreSQL](https://www.postgresql.org/)
+
+### Data processing
+
+- [OpenRefine](http://openrefine.org/)
+- [Pandas](http://pandas.pydata.org/)
+
+### Code analysis
+
+- loc/cloc
+- …
+
+### Visualization
+
+- D3.js or equivalent framework/library
 - …
