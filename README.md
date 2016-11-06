@@ -20,9 +20,9 @@ We propose gathering as much data as we can about GitHub users located in Switze
 - Where are developers located in Switzerland?
 - And more…
 
-From a few preliminary GitHub Search queries, we estimate the number of GitHub users who we can locate in Switzerland to between 15'000 and 20'000. This should hopefully give us enough data to answers the questions above, and hopefully some more that we haven't thought of yet.
+From a few preliminary GitHub Search queries, we estimate the number of GitHub users who we can locate in Switzerland to be between 15'000 and 20'000. This should hopefully give us enough data to answers the questions above, and hopefully a few more that we have not thought of yet.
 
-This project would involve quite a bit of data retrieval at first, then a fair amount of data processing and code analysis, before leaving us with a lot of data visualization to come up with, such as heat maps, graphs, charts, etc.
+This project would involve quite a bit of data retrieval at first, then a fair amount of data processing and code analysis, before leaving us with a lot of visualizations to come up with, such as heat maps, graphs, charts, lists, etc.
 
 ## Timeline
 
