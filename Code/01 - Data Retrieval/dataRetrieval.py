@@ -14,54 +14,98 @@ if not token:
     print('Missing ' + GITHUB3_TOKEN + ' environment variable. Please check README.md.')
     sys.exit(1)
 
-gh = github3.login(token=token)
-
 def location(loc):
     return 'location:{}'.format(loc)
 
 def search_users(query):
-    return gh.search_users(query, number=10)
+    key  = 'search_users:{}'.format(query)
+    gen  = gh.search_users(query, number=10, etag=etag(key))
 
-# TODO: Search also by major cities names
+    return gen_to_list(gen, key)
 
-en_users = search_users(location('Switzerland'))
-fr_users = search_users(location('Suisse'))
-de_users = search_users(location('Schweiz'))
-it_users = search_users(location('Svizzera'))
-ch_users = search_users(location('CH'))
+def gen_to_list(gen, key, *args):
+    values = list(gen)
+    key    = key.format(*args)
+    etag   = dict(key = key, etag = gen.etag)
 
-search_res = itertools.chain(en_users, fr_users, de_users, it_users, ch_users)
+    db.etags.replace_one({ 'key': key }, etag, upsert=True)
 
-def user_to_dict(user, fetch_follow=False):
-    if fetch_follow:
-        followers = list(user.followers())
-        following = list(user.following())
+    return values
+
+def etag(key, *args):
+    doc = db.etags.find_one({ 'key': key.format(*args) })
+
+    if doc is None:
+        return None
+
+    return doc['etag']
+
+def repo_to_dict(repo):
+    return dict(
+        _id               = repo.id,
+        name              = repo.name,
+        owner_id          = repo.owner.id,
+        language          = repo.language,
+        forks_count       = repo.forks_count,
+        open_issues       = repo.open_issues,
+        watchers_count    = repo.watchers_count,
+        full_name         = repo.full_name,
+        created_at        = repo.created_at,
+        fork              = repo.fork,
+        has_downloads     = repo.has_downloads,
+        homepage          = repo.homepage,
+        stargazers_count  = repo.stargazers_count,
+        open_issues_count = repo.open_issues_count,
+        has_pages         = repo.has_pages,
+        has_issues        = repo.has_issues,
+        private           = repo.private,
+        size              = repo.size,
+        clone_url         = repo.clone_url
+    )
+
+def user_to_dict(user, fetch=False):
+    if fetch:
+        print(' => Fetching followers...')
+        key       = 'followers_of:{}'.format(user.id)
+        followers = gen_to_list(user.followers(etag = etag(key)), key)
+
+        print(' => Fetching following...')
+        key       = 'following_of:{}'.format(user.id)
+        following = gen_to_list(user.following(etag = etag(key)), key)
+
+        print(' => Fetching repositories...')
+        key          = 'repositories_of:{}'.format(user.id)
+        repositories = gen_to_list(gh.repositories_by(user.login, etag = etag(key)), key)
     else:
-        followers = following = []
+        followers = following = repositories = []
 
     followers_ids = [f.id for f in followers]
     following_ids = [f.id for f in following]
 
+    repositories_dicts = [repo_to_dict(r) for r in repositories]
+
     user_dict = dict(
-        _id       = user.id,
-        login     = user.login,
-        name      = user.name,
-        location  = user.location,
-        company   = user.company,
-        followers = followers_ids,
-        following = following_ids
+        _id          = user.id,
+        login        = user.login,
+        name         = user.name,
+        location     = user.location,
+        company      = user.company,
+        followers    = followers_ids,
+        following    = following_ids,
+        repositories = repositories_dicts
     )
 
     return (user_dict, followers, following)
 
 def insert_user(user, insert_follow=False):
-    print('{}Refreshing user {}...'.format('' if insert_follow else '    ', user.login))
+    print('{}Refreshing user {}...'.format('' if insert_follow else ' * ', user.login))
+
     user = user.refresh()
 
     (user_dict, followers, following) = user_to_dict(user, insert_follow)
 
-    print('{}Inserting user {}...'.format('' if insert_follow else '    ', user.login))
-    db.users.replace_one({ '_id': user_dict['_id'] }, user_dict, upsert=True)
+    print('{}Inserting user {}...'.format('' if insert_follow else ' * ', user.login))
+    db.users.replace_one({ '_id': user.id }, user_dict, upsert=True)
 
     # if insert_follow:
     #     for f in followers:
@@ -72,6 +116,16 @@ def insert_user(user, insert_follow=False):
 
 client = MongoClient('localhost', 27017)
 db = client.ada
+
+gh = github3.login(token=token)
+
+en_users = search_users(location('Switzerland'))
+fr_users = search_users(location('Suisse'))
+de_users = search_users(location('Schweiz'))
+it_users = search_users(location('Svizzera'))
+ch_users = search_users(location('CH'))
+
+search_res = itertools.chain(en_users, fr_users, de_users, it_users, ch_users)
 
 for res in search_res:
     print('Processing user {}...'.format(res.user.login))
