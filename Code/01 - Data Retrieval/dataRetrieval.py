@@ -1,18 +1,13 @@
 
 import os
 import sys
+import time
+import datetime
 
 import itertools
 import github3
 
 from pymongo import MongoClient
-
-GITHUB3_TOKEN = 'GITHUB3_TOKEN'
-token = os.environ.get(GITHUB3_TOKEN)
-
-if not token:
-    print('Missing ' + GITHUB3_TOKEN + ' environment variable. Please check README.md.')
-    sys.exit(1)
 
 def location(loc):
     return 'location:{}'.format(loc)
@@ -89,11 +84,17 @@ def user_to_dict(user, fetch=False):
         login        = user.login,
         name         = user.name,
         location     = user.location,
-        company      = user.company,
-        followers    = followers_ids,
-        following    = following_ids,
-        repositories = repositories_dicts
+        company      = user.company
     )
+
+    if len(followers) > 0:
+        user_dict['followers'] = followers_ids
+
+    if len(following) > 0:
+        user_dict['following'] = following_ids
+
+    if len(repositories) > 0:
+        user_dict['repositories'] = repositories_dicts
 
     return (user_dict, followers, following)
 
@@ -105,7 +106,8 @@ def insert_user(user, insert_follow=False):
     (user_dict, followers, following) = user_to_dict(user, insert_follow)
 
     print('{}Inserting user {}...'.format('' if insert_follow else ' * ', user.login))
-    db.users.replace_one({ '_id': user.id }, user_dict, upsert=True)
+
+    db.users.update_one({ '_id': user.id }, { '$set': user_dict }, upsert=True)
 
     # if insert_follow:
     #     for f in followers:
@@ -114,20 +116,42 @@ def insert_user(user, insert_follow=False):
     #     for f in following:
     #         insert_user(f, False)
 
-client = MongoClient('localhost', 27017)
-db = client.ada
+def show_rate_limit():
+    rate       = gh.rate_limit()
+    rate       = rate['resources']['core']
+    limit      = rate['limit']
+    remaining  = rate['remaining']
+    reset      = rate['reset']
+    reset_in_s = reset - int(time.time())
+    reset_in   = str(datetime.timedelta(seconds = reset_in_s))
 
-gh = github3.login(token=token)
+    print('GitHub API calls: {} remaining, reset to {} in {}\n'.format(remaining, limit, reset_in))
 
-en_users = search_users(location('Switzerland'))
-fr_users = search_users(location('Suisse'))
-de_users = search_users(location('Schweiz'))
-it_users = search_users(location('Svizzera'))
-ch_users = search_users(location('CH'))
+if __name__ == '__main__':
 
-search_res = itertools.chain(en_users, fr_users, de_users, it_users, ch_users)
+    GITHUB3_TOKEN = 'GITHUB3_TOKEN'
+    token = os.environ.get(GITHUB3_TOKEN)
 
-for res in search_res:
-    print('Processing user {}...'.format(res.user.login))
-    insert_user(res.user, True)
+    if not token:
+        print('Missing ' + GITHUB3_TOKEN + ' environment variable. Please check README.md.')
+        sys.exit(1)
+
+    client = MongoClient('localhost', 27017)
+    db = client.ada
+
+    gh = github3.login(token=token)
+
+    show_rate_limit()
+
+    en_users = search_users(location('Switzerland'))
+    fr_users = search_users(location('Suisse'))
+    de_users = search_users(location('Schweiz'))
+    it_users = search_users(location('Svizzera'))
+    ch_users = search_users(location('CH'))
+
+    search_res = itertools.chain(en_users, fr_users, de_users, it_users, ch_users)
+
+    for res in search_res:
+        print('Processing user {}...'.format(res.user.login))
+        insert_user(res.user, True)
 
