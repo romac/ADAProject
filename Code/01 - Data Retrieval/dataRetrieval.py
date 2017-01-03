@@ -4,7 +4,8 @@ import sys
 
 import itertools
 import github3
-import dataset
+
+from pymongo import MongoClient
 
 GITHUB3_TOKEN = 'GITHUB3_TOKEN'
 token = os.environ.get(GITHUB3_TOKEN)
@@ -31,35 +32,48 @@ ch_users = search_users(location('CH'))
 
 search_res = itertools.chain(en_users, fr_users, de_users, it_users, ch_users)
 
-def user_to_dict(user):
-    return dict(
-        id       = user.id,
-        login    = user.login,
-        name     = user.name,
-        location = user.location,
-        company  = user.company
+def user_to_dict(user, fetch_follow=False):
+    if fetch_follow:
+        followers = list(user.followers())
+        following = list(user.following())
+    else:
+        followers = following = []
+
+    followers_ids = [f.id for f in followers]
+    following_ids = [f.id for f in following]
+
+    user_dict = dict(
+        _id       = user.id,
+        login     = user.login,
+        name      = user.name,
+        location  = user.location,
+        company   = user.company,
+        followers = followers_ids,
+        following = following_ids
     )
 
-db = dataset.connect('sqlite:///database.db')
+    return (user_dict, followers, following)
 
-users_table     = db['users']
-followers_table = db['followers']
-following_table = db['following']
+def insert_user(user, insert_follow=False):
+    print('{}Refreshing user {}...'.format('' if insert_follow else '    ', user.login))
+    user = user.refresh()
 
-def insert_user(user):
-    user_dict = user_to_dict(user)
-    followers = [f for f in user.followers()]
-    following = [f for f in user.following()]
+    (user_dict, followers, following) = user_to_dict(user, insert_follow)
 
-    users_table.insert(user_dict)
-    for f in followers:
-        followers_table.insert(dict(user_id=user.id, follower_id=f.id))
+    print('{}Inserting user {}...'.format('' if insert_follow else '    ', user.login))
+    db.users.replace_one({ '_id': user_dict['_id'] }, user_dict, upsert=True)
 
-    for f in following:
-        following_table.insert(dict(user_id=user.id, following_id=f.id))
+    # if insert_follow:
+    #     for f in followers:
+    #         insert_user(f, False)
+
+    #     for f in following:
+    #         insert_user(f, False)
+
+client = MongoClient('localhost', 27017)
+db = client.ada
 
 for res in search_res:
-    print('Processing user {}'.format(res.user.login))
-    user = res.user.refresh()
-    insert_user(user)
+    print('Processing user {}...'.format(res.user.login))
+    insert_user(res.user, True)
 

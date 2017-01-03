@@ -3,25 +3,58 @@
 
 ## Setup
 
-1. Install the required Python libraries
+### OS X
 
-```bash
-$ ~/anaconda/bin/pip install --pre github3.py
-$ ~/anaconda/bin/pip install dataset
-```
+1. [Install Homebrew](http://brew.sh/):
 
-2. Go to [https://github.com/settings/tokens](https://github.com/settings/tokens), click on `Generate new token`, and enter your password.
-Pick something like `EPFL ADA Project` for the description, and click `Generate token`.
+  ```bash
+  $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  ```
 
-3. Create a file in this directory with the name `env.sh` and put the following inside, substituting `GH_TOKEN` with the token you just generated:
+2. [Install MongoDB](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/):
 
-```bash
-# env.sh
+  ```bash
+  $ brew update
+  $ brew install mongodb
+  ```
 
-export GITHUB3_TOKEN="GH_TOKEN"
-```
+3. Install the required Python libraries:
 
-This file is ignored by Git, so don't worry about accidentally committing your token.
+  ```bash
+  $ ~/anaconda/bin/pip install --pre github3.py
+  $ ~/anaconda/bin/pip install pymongo
+  ```
+
+  * [github3.py docs](https://github3.readthedocs.io/en/develop/)
+  * [PyMongo docs](http://api.mongodb.com/python/current/)
+
+4. Go to [https://github.com/settings/tokens](https://github.com/settings/tokens), click on `Generate new token`, and enter your password.
+   Pick something like `EPFL ADA Project` for the description, and click `Generate token`.
+
+5. Create a file in this directory with the name `env.sh` and put the following inside, substituting `GH_TOKEN` with the token you just generated:
+
+  ```bash
+  # env.sh
+
+  export GITHUB3_TOKEN="GH_TOKEN"
+  ```
+
+  This file is ignored by Git, so don't worry about accidentally committing your token.
+
+6. Start MongoDB by running the following command from the root of this repository, in a new tab:
+
+  ```bash
+  $ mongod -f mongod.conf
+  ```
+
+### Linux
+
+Follow the same steps as for OS X, except for the first two ones. Instead, install
+MongoDB using your favorite package manager.
+
+### Windows
+
+???
 
 ## Usage
 
