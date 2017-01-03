@@ -98,8 +98,8 @@ def gist_to_dict(gist):
         comments_count = gist.comments_count
     )
 
-def user_to_dict(user, fetch=False):
-    if fetch:
+def user_to_dict(user, in_ch=False):
+    if in_ch:
         print(' => Fetching followers...')
         key       = 'followers_of:{}'.format(user.id)
         followers = gen_to_list(user.followers(etag = etag(key)), key)
@@ -139,6 +139,9 @@ def user_to_dict(user, fetch=False):
         company      = user.company
     )
 
+    if in_ch:
+        user_dict['in_ch']         = True
+
     if len(followers) > 0:
         user_dict['followers']     = [f.id for f in followers]
 
@@ -167,12 +170,12 @@ def user_to_dict(user, fetch=False):
         following    = following
     )
 
-def insert_user(user, insert_follow=False):
-    if insert_follow:
-        print('Refreshing user {}...'.format(user.login))
+def insert_user(user, in_ch=False):
+    if in_ch:
+        print(' => Refreshing...')
         user = user.refresh()
 
-    res = user_to_dict(user, insert_follow)
+    res = user_to_dict(user, in_ch)
 
     db.users.update_one({ '_id': user.id }, { '$set': res.user }, upsert=True)
 
@@ -188,13 +191,13 @@ def insert_user(user, insert_follow=False):
     for gist in res.gists:
         db.gists.update_one({ '_id': gist._id }, { '$set': gist }, upsert=True)
 
-    if insert_follow:
+    if in_ch:
         print(' => Inserting followers & following...')
         for f in res.followers:
-            insert_user(f, False)
+            insert_user(f, in_ch=False)
 
         for f in res.following:
-            insert_user(f, False)
+            insert_user(f, in_ch=False)
 
 def show_rate_limit():
     rate       = gh.rate_limit()
@@ -238,5 +241,5 @@ if __name__ == '__main__':
 
     for res in search_res:
         print('Processing user {}...'.format(res.user.login))
-        insert_user(res.user, True)
+        insert_user(res.user, in_ch=True)
 
