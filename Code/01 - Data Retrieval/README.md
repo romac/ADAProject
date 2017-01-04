@@ -22,7 +22,9 @@
 
   ```bash
   $ ~/anaconda/bin/pip install --pre github3.py
-  $ ~/anaconda/bin/pip install pymongo
+  $ ~/anaconda/bin/pip install --upgrade pymongo
+  $ ~/anaconda/bin/pip install --upgrade BeautifulSoup4
+  $ ~/anaconda/bin/pip install --upgrade requests
   ```
 
   * [github3.py docs](https://github3.readthedocs.io/en/develop/)
@@ -61,7 +63,10 @@ MongoDB using your favorite package manager.
 ## Usage
 
 ```bash
-~/anaconda/bin/python3 dataRetrieval.py
+~/anaconda/bin/python3 scrape_git_awards.py > users.json
+~/anaconda/bin/python3 fetch.py
+~/anaconda/bin/python3 refresh.py
+~/anaconda/bin/python3 geocode.py
 ```
 
 ## License
