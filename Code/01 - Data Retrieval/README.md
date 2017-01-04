@@ -37,11 +37,13 @@
   # env.sh
 
   export GITHUB3_TOKEN="GH_TOKEN"
+  export MONGO_HOST="localhost"
+  export MONGO_PORT=27017
   ```
 
   This file is ignored by Git, so don't worry about accidentally committing your token.
 
-6. Start MongoDB by running the following command from the root of this repository, in a new tab:
+6. Start MongoDB by running the following command from the `Code/` folder, in a new tab:
 
   ```bash
   $ mongod -f mongod.conf

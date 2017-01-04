@@ -9,33 +9,7 @@ import github3
 
 from pymongo import MongoClient
 
-class kobjdict(dict):
-    def __getattr__(self, name):
-        if name in self:
-            return self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
-
-    def __setattr__(self, name, value):
-        self[name] = value
-
-    def __delattr__(self, name):
-        if name in self:
-            del self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
-
-def objdict(**kwargs):
-    return kobjdict(dict(**kwargs))
-
-def location(loc):
-    return 'location:{}'.format(loc)
-
-def search_users(query):
-    key  = 'search_users:{}'.format(query)
-    gen  = gh.search_users(query, number=10, etag=etag(key))
-
-    return gen_to_list(gen, key)
+from utils import *
 
 def gen_to_list(gen, key, *args):
     values = list(gen)
@@ -54,52 +28,22 @@ def etag(key, *args):
 
     return doc['etag']
 
-def repo_to_dict(repo):
-    return objdict(
-        _id               = repo.id,
-        name              = repo.name,
-        owner_id          = repo.owner.id,
-        language          = repo.language,
-        forks_count       = repo.forks_count,
-        open_issues       = repo.open_issues,
-        watchers_count    = repo.watchers_count,
-        full_name         = repo.full_name,
-        created_at        = repo.created_at,
-        fork              = repo.fork,
-        has_downloads     = repo.has_downloads,
-        homepage          = repo.homepage,
-        stargazers_count  = repo.stargazers_count,
-        open_issues_count = repo.open_issues_count,
-        has_pages         = repo.has_pages,
-        has_issues        = repo.has_issues,
-        private           = repo.private,
-        size              = repo.size,
-        clone_url         = repo.clone_url
-    )
+def location(loc):
+    return 'location:{}'.format(loc)
 
-def org_to_dict(org):
-    org = org.refresh()
+def search_users(query, count=10):
+    print('Searching for users: \'{}\'...'.format(query))
 
-    return objdict(
-        _id         = org.id,
-        login       = org.login,
-        name        = org.name,
-        description = org.description,
-        blog        = org.blog
-    )
+    key  = 'search_users:{}'.format(query)
+    gen  = gh.search_users(query, number=count, etag=etag(key))
 
-def gist_to_dict(gist):
-    gist = gist.refresh()
+    return gen_to_list(gen, key)
 
-    return objdict(
-        _id            = gist.id,
-        description    = gist.description,
-        owner_id       = gist.owner.id,
-        comments_count = gist.comments_count
-    )
+def fetch_user(user, in_ch=False, fetch_props=None):
+    if fetch_props is None:
+        fetch_props = in_ch
 
-def user_to_dict(user, in_ch=False):
-    if in_ch:
+    if fetch_props:
         print(' => Fetching followers...')
         key       = 'followers_of:{}'.format(user.id)
         followers = gen_to_list(user.followers(etag = etag(key)), key)
@@ -131,34 +75,15 @@ def user_to_dict(user, in_ch=False):
     orgs_dicts         = [org_to_dict(o)  for o in orgs]
     gists_dicts        = [gist_to_dict(g) for g in gists]
 
-    user_dict = objdict(
-        _id          = user.id,
-        login        = user.login,
-        name         = user.name,
-        location     = user.location,
-        company      = user.company
+    user_dict = user_to_dict(
+        user=user,
+        in_ch=in_ch,
+        repositories=repositories_dicts,
+        starred=starred_dicts,
+        orgs=orgs_dicts,
+        gists=gists_dicts,
+        override=False
     )
-
-    if in_ch:
-        user_dict['in_ch']         = True
-
-    if len(followers) > 0:
-        user_dict['followers']     = [f.id for f in followers]
-
-    if len(following) > 0:
-        user_dict['following']     = [f.id for f in following]
-
-    if len(repositories) > 0:
-        user_dict['repositories']  = [r._id for r in repositories_dicts]
-
-    if len(starred) > 0:
-        user_dict['starred']       = [r._id for r in starred_dicts]
-
-    if len(orgs) > 0:
-        user_dict['organizations'] = [o._id for o in orgs_dicts]
-
-    if len(gists) > 0:
-        user_dict['gists']         = [g._id for g in gists_dicts]
 
     return objdict(
         user         = user_dict,
@@ -175,7 +100,7 @@ def insert_user(user, in_ch=False):
         print(' => Refreshing...')
         user = user.refresh()
 
-    res = user_to_dict(user, in_ch)
+    res = fetch_user(user, in_ch)
 
     db.users.update_one({ '_id': user.id }, { '$set': res.user }, upsert=True)
 
@@ -220,15 +145,40 @@ def get_token():
 
     return token
 
-def login():
+def github_login():
+    print('Logging-in with GitHub...')
     return github3.login(token=get_token())
 
-if __name__ == '__main__':
-    client = MongoClient('localhost', 27017)
+def get_mongo_conn_info():
+    MONGO_HOST, MONGO_PORT = 'MONGO_HOST', 'MONGO_PORT'
+
+    host = str(os.environ.get(MONGO_HOST)) or 'localhost'
+    port = int(os.environ.get(MONGO_PORT)) or 27017
+
+    return host, port
+
+def get_mongo_db():
+    mongoHost, mongoPort = get_mongo_conn_info()
+
+    print('Connecting to MongoDB at {}:{}...'.format(mongoHost, mongoPort))
+
+    client = MongoClient(mongoHost, mongoPort)
+
     db = client.ada
 
-    gh = login()
+    try:
+        db.current_op()
+    except:
+        print('Could not connect to MongoDB at {}:{}'.format(mongoHost, mongoPort))
 
+        sys.exit(1)
+
+    return db
+
+if __name__ == '__main__':
+
+    db = get_mongo_db()
+    gh = github_login()
     show_rate_limit()
 
     en_users = search_users(location('Switzerland'))
