@@ -9,10 +9,7 @@ from utils import eprint
 
 base_url = 'http://git-awards.com/users?type=country&country=Switzerland'
 
-def page_url(language, page_num=1):
-    return base_url + '&language={}&page={}'.format(language, page_num)
-
-def get_page(url, params=None):
+def get_page(url, **params):
     r = requests.get(url, params)
 
     if r.status_code is not requests.codes.ok:
@@ -46,8 +43,7 @@ def list_users(page):
 
 def fetch_users_by_lang(lang):
     eprint('Fetching language {}...'.format(lang))
-    url = page_url(lang)
-    page = get_page(url)
+    page = get_page(base_url, language=lang)
     last_page_num = get_last_page_number(page)
 
     eprint(' => Found {} pages for {}'.format(last_page_num, lang))
@@ -56,8 +52,7 @@ def fetch_users_by_lang(lang):
 
     for page_num in range(1, last_page_num + 1):
         eprint('Fetching page {}...'.format(page_num))
-        url = page_url(lang, page_num)
-        page = get_page(url)
+        page = get_page(base_url, language=lang, page=page_num)
 
         users = list_users(page)
 
@@ -69,10 +64,9 @@ def fetch_users_by_lang(lang):
 
     return res
 
-page = get_page(base_url)
+page  = get_page(base_url)
 
 langs = list_languages(page)
-
 users = set([])
 
 for lang in langs:
