@@ -62,12 +62,7 @@ MongoDB using your favorite package manager.
 
 ## Usage
 
-```bash
-~/anaconda/bin/python3 scrape_git_awards.py > users.json
-~/anaconda/bin/python3 fetch.py
-~/anaconda/bin/python3 refresh.py
-~/anaconda/bin/python3 geocode.py
-```
+To be written…
 
 ## License
 
