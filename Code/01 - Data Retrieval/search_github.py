@@ -18,7 +18,11 @@ def search_users(db, query, count=-1):
 
     return gen_to_list(db, gen, key)
 
-def insert_user(db, user, in_ch=True):
+def insert_user(db, user, in_ch=True, update=True):
+    if db.users.find_one({ '_id': user.id }) and not update:
+        print('Skipping existing user {}'.format(user.login))
+        return
+
     print('Inserting user {}...'.format(user.login))
 
     user_dict = user_to_dict(user=user, in_ch=in_ch, override=in_ch)

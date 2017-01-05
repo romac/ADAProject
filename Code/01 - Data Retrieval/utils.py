@@ -49,16 +49,23 @@ def etag(db, key, *args):
     return doc['etag']
 
 def user_to_dict(user, in_ch, followers=[], following=[], repositories=[], starred=[], orgs=[], gists=[], override=False):
+
     user_dict = objdict(
-        _id          = user.id,
-        login        = user.login,
-        name         = user.name,
-        location     = user.location,
-        company      = user.company
+        _id   = user.id,
+        login = user.login
     )
 
     if in_ch:
         user_dict['in_ch'] = True
+
+    if override or user.name and len(user.name) > 0:
+        user_dict['name'] = user.name
+
+    if override or user.location and len(user.location) > 0:
+        user_dict['location'] = user.location
+
+    if override or user.company and len(user.company) > 0:
+        user_dict['company'] = user.company
 
     if override or len(followers) > 0:
         user_dict['followers'] = [f.id for f in followers]

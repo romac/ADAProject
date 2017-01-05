@@ -104,10 +104,10 @@ def refresh_user(user, num=0, in_ch=False, force_check_rate=False):
         print(' => Inserting followers & following...')
 
         for f in res.followers:
-            insert_user(f, in_ch=False)
+            insert_user(f, update=False, in_ch=False)
 
         for f in res.following:
-            insert_user(f, in_ch=False)
+            insert_user(f, update=False, in_ch=False)
 
 if __name__ == '__main__':
 
@@ -119,5 +119,5 @@ if __name__ == '__main__':
     ch_users = db.users.find({ 'in_ch': True })
 
     for user, i in zip(ch_users, range(len(ch_users))):
-        refresh_user(kobjdict(user), i)
+        refresh_user(kobjdict(user), i, in_ch=True)
 

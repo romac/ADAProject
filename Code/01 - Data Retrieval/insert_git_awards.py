@@ -17,8 +17,7 @@ def insert_username(username, num=0, force_check_rate=False):
     try:
         user = gh.user(username)
     except ForbiddenError:
-        insert_username(username, num, True)
-        return
+        return insert_username(username, num, force_check_rate=True)
 
     if not user or not user.id:
         print(' => User doesn\'t exists')
