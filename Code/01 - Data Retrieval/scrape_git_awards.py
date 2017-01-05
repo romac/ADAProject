@@ -94,15 +94,20 @@ def fetch_users_by_lang(lang):
 
     return res
 
-page = get_page(base_url)
+def scrape_git_awards():
+    page = get_page(base_url)
 
-langs = list_languages(page)
-users = set([])
+    langs = list_languages(page)
+    users = set([])
 
-for lang in langs:
-    users.update(fetch_users_by_lang(lang))
+    for lang in langs:
+        users.update(fetch_users_by_lang(lang))
 
-eprint('Found {} users.'.format(len(users)))
+    eprint('Found {} users.'.format(len(users)))
 
-print(json.dumps(list(users)))
+    return users
+
+if __name__ == '__main__':
+    users = scrape_git_awards()
+    print(json.dumps(list(users)))
 
