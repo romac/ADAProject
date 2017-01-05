@@ -177,10 +177,10 @@ def show_rate_limit(gh):
 def get_mongo_conn_info():
     MONGO_HOST, MONGO_PORT = 'MONGO_HOST', 'MONGO_PORT'
 
-    host = str(os.environ.get(MONGO_HOST)) or 'localhost'
-    port = int(os.environ.get(MONGO_PORT)) or 27017
+    host = os.environ.get(MONGO_HOST) or 'localhost'
+    port = os.environ.get(MONGO_PORT) or 27017
 
-    return host, port
+    return str(host), int(port)
 
 def get_mongo_db():
     mongoHost, mongoPort = get_mongo_conn_info()
