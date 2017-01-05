@@ -9,38 +9,39 @@ import github3
 
 from pymongo import MongoClient
 
-from utils import *
-from search_github import insert_user
+from github3.exceptions import ForbiddenError
 
-def fetch_user_infos(user, in_ch=False):
+from utils import *
+
+def fetch_user_infos(user, in_ch=False, force=True):
     print(' => Fetching followers...')
     key       = 'followers_of:{}'.format(user.id)
-    followers = gen_to_list(db, user.followers(etag = etag(db, key)), key)
+    followers = gen_to_list(db, user.followers(etag = etag(db, key) if not force else None), key)
     print('     => Found {}'.format(len(followers)))
 
     print(' => Fetching following...')
     key       = 'following_of:{}'.format(user.id)
-    following = gen_to_list(db, user.following(etag = etag(db, key)), key)
+    following = gen_to_list(db, user.following(etag = etag(db, key) if not force else None), key)
     print('     => Found {}'.format(len(following)))
 
     print(' => Fetching repositories...')
     key          = 'repositories_of:{}'.format(user.id)
-    repositories = gen_to_list(db, gh.repositories_by(user.login, etag = etag(db, key)), key)
+    repositories = gen_to_list(db, gh.repositories_by(user.login, etag = etag(db, key) if not force else None), key)
     print('     => Found {}'.format(len(repositories)))
 
     print(' => Fetching starred repositories...')
     key     = 'starred_by:{}'.format(user.id)
-    starred = gen_to_list(db, gh.starred_by(user.login, etag = etag(db, key)), key)
+    starred = gen_to_list(db, gh.starred_by(user.login, etag = etag(db, key) if not force else None), key)
     print('     => Found {}'.format(len(starred)))
 
     print(' => Fetching organizations...')
     key  = 'organizations_with:{}'.format(user.id)
-    orgs = gen_to_list(db, gh.organizations_with(user.login, etag = etag(db, key)), key)
+    orgs = gen_to_list(db, gh.organizations_with(user.login, etag = etag(db, key) if not force else None), key)
     print('     => Found {}'.format(len(orgs)))
 
     print(' => Fetching gists...')
     key  = 'gists_by:{}'.format(user.id)
-    gists = gen_to_list(db, gh.gists_by(user.login, etag = etag(db, key)), key)
+    gists = gen_to_list(db, gh.gists_by(user.login, etag = etag(db, key) if not force else None), key)
     print('     => Found {}'.format(len(gists)))
 
     repositories_dicts = [repo_to_dict(r) for r in repositories]
@@ -104,10 +105,10 @@ def refresh_user(user, num=0, in_ch=False, force_check_rate=False):
         print(' => Inserting followers & following...')
 
         for f in res.followers:
-            insert_user(f, update=False, in_ch=False)
+            insert_user(db, user=f, in_ch=False, update=False)
 
         for f in res.following:
-            insert_user(f, update=False, in_ch=False)
+            insert_user(db, user=f, in_ch=False, update=False)
 
 if __name__ == '__main__':
 
@@ -116,7 +117,10 @@ if __name__ == '__main__':
 
     show_rate_limit(gh)
 
-    ch_users = db.users.find({ 'in_ch': True })
+    ch_users = list(db.users.find({
+        'in_ch': True,
+        'last_refresh': None
+    }))
 
     for user, i in zip(ch_users, range(len(ch_users))):
         refresh_user(kobjdict(user), i, in_ch=True)

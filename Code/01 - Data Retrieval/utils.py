@@ -48,7 +48,18 @@ def etag(db, key, *args):
 
     return doc['etag']
 
-def user_to_dict(user, in_ch, followers=[], following=[], repositories=[], starred=[], orgs=[], gists=[], override=False):
+def insert_user(db, user, in_ch=True, update=True):
+    if db.users.find_one({ '_id': user.id }) and not update:
+        print('Skipping existing user {}'.format(user.login))
+        return
+
+    print('Inserting user {}...'.format(user.login))
+
+    user_dict = user_to_dict(user=user, in_ch=in_ch, override=in_ch)
+
+    db.users.update_one({ '_id': user.id }, { '$set': user_dict }, upsert=True)
+
+def user_to_dict(user, in_ch, followers=[], following=[], repositories=[], starred=[], orgs=[], gists=[], last_refresh=None, override=False):
 
     user_dict = objdict(
         _id   = user.id,
@@ -84,6 +95,9 @@ def user_to_dict(user, in_ch, followers=[], following=[], repositories=[], starr
 
     if override or len(gists) > 0:
         user_dict['gists'] = [g._id for g in gists]
+
+    if last_refresh:
+        user_dict['last_refresh'] = last_refresh
 
     return user_dict
 
