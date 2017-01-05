@@ -51,6 +51,13 @@
   $ mongod -f mongod.conf
   ```
 
+7. We now need to import the data in our local MongoDB database.
+   To do so, just run the following command from the `Code` directory:
+
+  ```bash
+  $ make mongo_restore
+  ```
+
 ### Linux
 
 Follow the same steps as for OS X, except for the first two ones. Instead, install
@@ -59,10 +66,6 @@ MongoDB using your favorite package manager.
 ### Windows
 
 ???
-
-## Usage
-
-To be written…
 
 ## License
 
