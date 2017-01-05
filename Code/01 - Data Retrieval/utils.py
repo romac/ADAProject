@@ -178,10 +178,10 @@ def wait_until(future_time):
 
     print('')
 
-def show_rate_limit(gh):
+def show_rate_limit(gh, resources=['core'], oneline=False):
     rate = gh.rate_limit()
 
-    def show_resource(resource):
+    def show_resource(resource, oneline=False):
         res        = rate['resources'][resource]
         limit      = res['limit']
         remaining  = res['remaining']
@@ -189,10 +189,17 @@ def show_rate_limit(gh):
         reset_in_s = reset - int(time.time())
         reset_in   = str(datetime.timedelta(seconds = reset_in_s))
 
-        print('GitHub API calls for \'{}\': {} remaining, reset to {} in {}'.format(resource, remaining, limit, reset_in))
+        end = '\r' if oneline else '\n'
 
-    show_resource('core')
-    show_resource('search')
+        print('GitHub API calls for \'{}\': {} remaining, reset to {} in {}'.format(resource, remaining, limit, reset_in), end = end)
+
+    if len(resources) == 1 and oneline:
+        show_resource(resources[0], oneline)
+        return
+
+    for resource in resources:
+        show_resource(resource)
+
     print('')
 
 def get_mongo_conn_info():
