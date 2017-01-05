@@ -10,7 +10,7 @@ import github3
 from pymongo import MongoClient
 
 from utils import *
-from fetch import insert_user
+from search_github import insert_user
 
 def fetch_user_infos(user, in_ch=False):
     print(' => Fetching followers...')
