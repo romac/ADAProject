@@ -115,9 +115,6 @@ if __name__ == '__main__':
 
     ch_users = db.users.find({ 'in_ch': True })
 
-    i = 0
-
-    for user in ch_users:
+    for user, i in zip(ch_users, range(len(ch_users))):
         refresh_user(kobjdict(user), i)
-        i += 1
 
