@@ -12,7 +12,6 @@ import github3
 from pymongo import MongoClient
 
 from utils import *
-from fetch import insert_user
 
 def geocode_location(location):
     if location is not None and len(location) > 2:
@@ -47,7 +46,7 @@ if __name__ == '__main__':
 
     db = get_mongo_db()
 
-    ch_users = db.users.find({ 'in_ch': True, 'geocode.lat': None })
+    ch_users = db.users.find({ 'in_ch': True, 'geocode': None })
 
     for user in ch_users:
         geocode_user(kobjdict(user))
