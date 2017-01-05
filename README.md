@@ -4,6 +4,7 @@
 
 ## Team
 
+- Ismail Bensouda ([@Ismail64](https://github.com/Ismail64))
 - Dylan Bourgeois ([@dtsbourg](https://github.com/dtsbourg))
 - Simon Noetzlin ([@SimonNtz](https://github.com/SimonNtz))
 - Romain Ruetschi ([@romac](https://github.com/romac))
