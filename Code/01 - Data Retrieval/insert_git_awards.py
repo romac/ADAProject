@@ -1,10 +1,12 @@
 
 import json
 
+from github3.exceptions import ForbiddenError
+
 from utils import *
 
-def insert_username(username, num=0):
-    if num % 100 == 0:
+def insert_username(username, num=0, force_check_rate=False):
+    if num % 100 == 0 or force_check_rate:
         rate = gh.rate_limit()
         if is_rate_exceeded(rate):
             print('Rate limit exceeded!')
@@ -12,7 +14,11 @@ def insert_username(username, num=0):
 
     print('Fetching user {}...'.format(username))
 
-    user = gh.user(username)
+    try:
+        user = gh.user(username)
+    except ForbiddenError:
+        insert_username(username, num, True)
+        return
 
     if not user or not user.id:
         print(' => User doesn\'t exists')

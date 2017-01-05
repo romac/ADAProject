@@ -71,8 +71,8 @@ def fetch_user_infos(user, in_ch=False):
         following    = following
     )
 
-def refresh_user(user, num=0, in_ch=False):
-    if num % 100 == 0:
+def refresh_user(user, num=0, in_ch=False, force_check_rate=False):
+    if num % 100 == 0 or force_check_rate:
         rate = gh.rate_limit()
         if is_rate_exceeded(rate):
             print('Rate limit exceeded!')
@@ -80,8 +80,11 @@ def refresh_user(user, num=0, in_ch=False):
 
     print('Refreshing user {}...'.format(user.login))
 
-    gh_user = gh.user(user.login)
-    res     = fetch_user_infos(gh_user, in_ch)
+    try:
+        gh_user = gh.user(user.login)
+        res     = fetch_user_infos(gh_user, in_ch)
+    except ForbiddenError:
+        return refresh_user(user, num, in_ch, True)
 
     db.users.update_one({ '_id': user._id }, { '$set': res.user }, upsert=True)
 
