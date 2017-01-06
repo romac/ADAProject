@@ -7,7 +7,7 @@ import datetime
 import itertools
 import github3
 
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 
 from github3.exceptions import ForbiddenError
 
@@ -120,7 +120,11 @@ if __name__ == '__main__':
     ch_users = list(db.users.find({
         'in_ch': True,
         'last_refresh': None
-    }))
+    }).sort('login', ASCENDING))
+
+    if len(ch_users) is 0:
+        print('================\nNo more users to refresh.\n=================')
+        sys.exit(0)
 
     for user, i in zip(ch_users, range(len(ch_users))):
         refresh_user(kobjdict(user), i, in_ch=True)

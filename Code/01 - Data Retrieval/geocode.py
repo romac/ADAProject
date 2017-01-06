@@ -9,7 +9,7 @@ import datetime
 import itertools
 import github3
 
-from pymongo import MongoClient
+from pymongo import ASCENDING
 
 from utils import *
 
@@ -23,8 +23,6 @@ def geocode_location(location):
     return None
 
 def geocode_user(user):
-    print('Geocoding user \'{}\' with location \'{}\''.format(user.login, user.location))
-
     loc = geocode_location(user.location)
 
     if loc is not None:
@@ -46,8 +44,20 @@ if __name__ == '__main__':
 
     db = get_mongo_db()
 
-    ch_users = db.users.find({ 'in_ch': True, 'geocode': None })
+    ch_users = db.users.find({
+        'in_ch': True,
+        'location': { '$ne': None },
+        'geocode': None
+    }).sort('username', ASCENDING)
+
+    i = 1
+    total = ch_users.count()
 
     for user in ch_users:
+        count = '{}/{}'.format(i, total)
+        print('{} - Geocoding user \'{}\' with location \'{}\''.format(count, user['login'], user['location']))
+
         geocode_user(kobjdict(user))
+
+        i += 1
 
