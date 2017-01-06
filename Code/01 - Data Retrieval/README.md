@@ -71,6 +71,10 @@ MongoDB using your favorite package manager.
 
 ???
 
+## Usage
+
+Take a look at the [sample IPython notebook](02 - Data Analysis/Example.ipynb) in the [`02 - Data Analysis`](02 - Data Analysis/) folder.
+
 ## License
 
 This code is released under the BSD3 license.
