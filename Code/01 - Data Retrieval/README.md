@@ -34,12 +34,15 @@
 4. Go to [https://github.com/settings/tokens](https://github.com/settings/tokens), click on `Generate new token`, and enter your password.
    Pick something like `EPFL ADA Project` for the description, and click `Generate token`.
 
-5. Create a file in this directory with the name `env.sh` and put the following inside, substituting `GH_TOKEN` with the token you just generated:
+   Make also sure to create a [Geocoding API key](https://developers.google.com/maps/documentation/geocoding/get-api-key).
+
+5. Create a file in this directory with the name `env.sh` and put the following inside, substituting `GH_TOKEN`, and `GAPI_KEY` with the tokens you just generated:
 
   ```bash
   # env.sh
 
   export GITHUB3_TOKEN="GH_TOKEN"
+  export GOOGLE_API_KEY="GAPI_KEY"
   export MONGO_HOST="localhost"
   export MONGO_PORT=27017
   ```
