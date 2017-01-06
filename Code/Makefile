@@ -2,9 +2,8 @@
 .PHONY: mongo_dump mongo_restore
 
 mongo_dump:
-	rm -rf dump/ada
-	mongodump -d ada
+	mongodump --archive=dump/ada.archive --gzip --db ada
 
 mongo_restore:
-	mongorestore -d ada dump/
+	mongorestore --drop --archive=dump/ada.archive --gzip --db ada
 
