@@ -11,7 +11,8 @@
   $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   ```
 
-2. [Install MongoDB](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/):
+2. [Install MongoDB](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/):  
+  **IMPORTANT: Make sure to install MongoDB 3.4**
 
   ```bash
   $ brew update
