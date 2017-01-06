@@ -26,10 +26,14 @@
   $ ~/anaconda/bin/pip install --upgrade pymongo
   $ ~/anaconda/bin/pip install --upgrade BeautifulSoup4
   $ ~/anaconda/bin/pip install --upgrade requests
+  $ ~/anaconda/bin/pip install --upgrade geocoder
   ```
 
   * [github3.py docs](https://github3.readthedocs.io/en/develop/)
   * [PyMongo docs](http://api.mongodb.com/python/current/)
+  * [Geocoder docs](https://geocoder.readthedocs.io)
+  * [BeautifulSoup4 docs](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+  * [Requests docs](http://docs.python-requests.org/en/master/)
 
 4. Go to [https://github.com/settings/tokens](https://github.com/settings/tokens), click on `Generate new token`, and enter your password.
    Pick something like `EPFL ADA Project` for the description, and click `Generate token`.
