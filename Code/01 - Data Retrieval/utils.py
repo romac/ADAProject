@@ -34,13 +34,19 @@ def objdict(**kwargs):
 def gen_to_list(db, gen, key, *args):
     values = list(gen)
     key    = key.format(*args)
-    etag   = dict(key = key, etag = gen.etag)
+
+    # Disable useless E-Tag
+    # etag = dict(key = key, etag = gen.etag)
+    etag = None
 
     db.etags.replace_one({ 'key': key }, etag, upsert=True)
 
     return values
 
 def etag(db, key, *args):
+    # Disable useless E-Tag
+    return None
+
     doc = db.etags.find_one({ 'key': key.format(*args) })
 
     if doc is None:
