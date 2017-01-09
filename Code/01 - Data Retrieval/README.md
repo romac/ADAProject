@@ -73,7 +73,21 @@ MongoDB using your favorite package manager.
 
 ### Windows
 
-???
+Follow the same instructions as above, except for the following ones:
+
+2. Download and Install MongoDB 3.4 from [its download page](https://www.mongodb.com/download-center).
+
+6. Start MongoDB by running the following command from the `Code/` folder:
+
+  ```
+    "C:\Program Files\MongoDB\Server\3.4\bin\mongod.exe" --dbpath=.\data\mongodb
+  ```
+
+7. Import the data by running the following command from the `Code/` folder:
+
+  ```
+  "C:\Program Files\MongoDB\Server\3.4\bin\mongorestore.exe" --drop --archive=dump\ada.archive --gzip --db ada
+  ```
 
 ## Usage
 
