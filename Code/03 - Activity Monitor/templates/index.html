@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>ADA</title>
+    <style>
+    body {
+      text-align: center;
+      font-size: 36px;
+      margin-top: 20%;
+    }
+    #username {
+      height: 40px;
+      width: 300px;
+      font-size: 30px;
+    }
+    </style>
+  </head>
+  <body>
+    <form>
+      @<input type="text" id="username">
+    </form>
+    <script>
+      document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var username = document.querySelector('#username').value;
+        window.location = '/' + username;
+      });
+    </script>
+  </body>
+</html>

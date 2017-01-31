@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>ADA</title>
+    <style>
+      body {
+        text-align: center;
+        font: 'Myriad Pro', 'Helvetica';
+        font-size: 16px;
+      }
+      div {
+        text-align: left;
+      }
+      .cols {
+        height: auto;
+          overflow: hidden;
+      }
+
+      .col {
+        float: left;
+        width: 45%;
+      }
+
+      .log {
+        line-height: 1.5;
+        font-family: Monaco, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>@{{ name }}</h1>
+    <div class="cols">
+      <div class="col log">
+        {% autoescape false %}
+          {{ log }}
+        {% endautoescape %}
+      </div>
+      <div class="col">
+          <canvas id="chart"></canvas>
+      </div>
+    </div>
+    <script>
+    {% autoescape false %}
+    var stats = {{ stats }}
+    {% endautoescape %}
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script>
+    console.log(stats);
+    var ctx = document.querySelector('#chart');
+    var labels = Object.keys(stats.user);
+    var colors = {
+      user: 'red',
+      rest: 'blue'
+    };
+    var labelsStr = {
+        user: '@{{ name }}',
+        rest: 'GitHub users'
+    };
+    var dataset = Object.keys(stats).map(function(label) {
+      return {
+        label: labelsStr[label],
+        data: Object.values(stats[label]),
+        backgroundColor: colors[label]
+      }
+    });
+    var chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: dataset
+      },
+      options: {
+          barValueSpacing: 10,
+          scales: {
+            yAxes: [{
+              ticks: {
+                min: 0,
+              }
+            }]
+          }
+      }
+    });
+    </script>
+  </body>
+</html>
